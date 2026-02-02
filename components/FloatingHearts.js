@@ -1,7 +1,16 @@
 "use client"
 import { motion } from "framer-motion"
+import { useEffect, useState } from "react"
 
 export default function FloatingHearts() {
+  const [width, setWidth] = useState(0)
+
+  useEffect(() => {
+    setWidth(window.innerWidth)
+  }, [])
+
+  if (!width) return null
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {[...Array(15)].map((_, i) => (
@@ -9,7 +18,7 @@ export default function FloatingHearts() {
           key={i}
           initial={{
             y: "100%",
-            x: Math.random() * window.innerWidth,
+            x: Math.random() * width,
             opacity: 0
           }}
           animate={{
