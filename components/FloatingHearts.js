@@ -1,19 +1,22 @@
 "use client"
+
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 
 export default function FloatingHearts() {
+  const [mounted, setMounted] = useState(false)
   const [width, setWidth] = useState(0)
 
   useEffect(() => {
+    setMounted(true)
     setWidth(window.innerWidth)
   }, [])
 
-  if (!width) return null
+  if (!mounted || !width) return null
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(15)].map((_, i) => (
+      {[...Array(12)].map((_, i) => (
         <motion.div
           key={i}
           initial={{
@@ -26,9 +29,9 @@ export default function FloatingHearts() {
             opacity: [0, 1, 1, 0]
           }}
           transition={{
-            duration: 8 + Math.random() * 5,
+            duration: 10 + Math.random() * 5,
             repeat: Infinity,
-            delay: Math.random() * 5
+            delay: Math.random() * 4
           }}
           className="absolute text-pink-400 text-3xl"
         >

@@ -1,24 +1,36 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import FloatingHearts from "@/components/FloatingHearts"
-import confetti from "canvas-confetti"
 
 export default function LovePage() {
   const params = useParams()
   const id = Array.isArray(params.id) ? params.id[0] : params.id
+
+  if (!id || typeof id !== "string") return null
+
   const [noPos, setNoPos] = useState({ x: 0, y: 0 })
   const [yes, setYes] = useState(false)
   const [dark, setDark] = useState(false)
+  const [msgIndex, setMsgIndex] = useState(0)
+
+  const confettiRef = useRef(null)
+  const audioRef = useRef(null)
 
   const messages = [
     "Someone very special is waiting for your answer… 🥹",
     "Their heart is beating fast right now… 💓",
     "This moment could become a memory forever… 🌹"
   ]
-  const [msgIndex, setMsgIndex] = useState(0)
+
+  // Load confetti safely (client-side only)
+  useEffect(() => {
+    import("canvas-confetti").then((mod) => {
+      confettiRef.current = mod.default
+    })
+  }, [])
 
   // Mark as opened
   useEffect(() => {
@@ -29,18 +41,38 @@ export default function LovePage() {
     })
   }, [id])
 
-  // Background music
+  // Background music (muted autoplay trick)
   useEffect(() => {
     const audio = new Audio("/romantic.mp3")
     audio.loop = true
     audio.volume = 0.3
+    audio.muted = true
     audio.play().catch(() => {})
+
+    audioRef.current = audio
+
+    const unmute = () => {
+      if (audioRef.current) {
+        audioRef.current.muted = false
+      }
+      window.removeEventListener("click", unmute)
+      window.removeEventListener("touchstart", unmute)
+    }
+
+    window.addEventListener("click", unmute)
+    window.addEventListener("touchstart", unmute)
+
+    return () => {
+      window.removeEventListener("click", unmute)
+      window.removeEventListener("touchstart", unmute)
+      audio.pause()
+    }
   }, [])
 
-  // Text animation
+  // Drama text animation
   useEffect(() => {
     const timer = setInterval(() => {
-      setMsgIndex(i => (i + 1) % messages.length)
+      setMsgIndex((i) => (i + 1) % messages.length)
     }, 3000)
     return () => clearInterval(timer)
   }, [])
@@ -53,34 +85,41 @@ export default function LovePage() {
     })
 
     if (action === "YES") {
-      confetti({
-        particleCount: 200,
-        spread: 120,
-        origin: { y: 0.6 }
-      })
+      if (confettiRef.current) {
+        confettiRef.current({
+          particleCount: 200,
+          spread: 120,
+          origin: { y: 0.6 }
+        })
+      }
       setYes(true)
     }
   }
-if (!id) return null
 
   return (
-    <div className={`${dark ? "bg-black text-white" : "bg-gradient-to-br from-pink-200 to-red-300"} min-h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden`}>
+    <div
+      className={`${
+        dark
+          ? "bg-black text-white"
+          : "bg-gradient-to-br from-pink-200 to-red-300"
+      } min-h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden`}
+    >
       <FloatingHearts />
 
       <button
         onClick={() => setDark(!dark)}
-        className="absolute top-4 right-4 bg-white px-3 py-1 rounded shadow z-10"
+        className="absolute top-4 right-4 bg-white px-3 py-1 rounded shadow z-10 text-black"
       >
         {dark ? "☀️" : "🌙"}
       </button>
 
       {!yes ? (
         <>
-          <h1 className="text-3xl font-bold mb-2">
+          <h1 className="text-3xl font-bold mb-2 z-10">
             💘 Will you be my Valentine?
           </h1>
 
-          <p className="mb-8 text-lg transition-all">
+          <p className="mb-8 text-lg transition-all z-10">
             {messages[msgIndex]}
           </p>
 
