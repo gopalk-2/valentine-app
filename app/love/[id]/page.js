@@ -7,7 +7,8 @@ import FloatingHearts from "@/components/FloatingHearts"
 import confetti from "canvas-confetti"
 
 export default function LovePage() {
-  const { id } = useParams()
+  const params = useParams()
+  const id = Array.isArray(params.id) ? params.id[0] : params.id
   const [noPos, setNoPos] = useState({ x: 0, y: 0 })
   const [yes, setYes] = useState(false)
   const [dark, setDark] = useState(false)
@@ -60,6 +61,7 @@ export default function LovePage() {
       setYes(true)
     }
   }
+if (!id) return null
 
   return (
     <div className={`${dark ? "bg-black text-white" : "bg-gradient-to-br from-pink-200 to-red-300"} min-h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden`}>
