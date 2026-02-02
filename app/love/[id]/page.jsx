@@ -9,8 +9,6 @@ export default function LovePage() {
   const params = useParams()
   const id = Array.isArray(params.id) ? params.id[0] : params.id
 
-  if (!id || typeof id !== "string") return null
-
   const [noPos, setNoPos] = useState({ x: 0, y: 0 })
   const [yes, setYes] = useState(false)
   const [dark, setDark] = useState(false)
@@ -25,29 +23,40 @@ export default function LovePage() {
     "This moment could become a memory forever… 🌹"
   ]
 
+  // Validation state
+  const isValidId = id && typeof id === "string"
+
+
+
   // Load confetti safely (client-side only)
   useEffect(() => {
+    if (!isValidId) return
+
     import("canvas-confetti").then((mod) => {
       confettiRef.current = mod.default
     })
-  }, [])
+  }, [isValidId])
 
   // Mark as opened
   useEffect(() => {
+    if (!isValidId) return
+
     fetch("/api/respond", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, action: "OPENED" })
     })
-  }, [id])
+  }, [id, isValidId])
 
   // Background music (muted autoplay trick)
   useEffect(() => {
+    if (!isValidId) return
+
     const audio = new Audio("/romantic.mp3")
     audio.loop = true
     audio.volume = 0.3
     audio.muted = true
-    audio.play().catch(() => {})
+    audio.play().catch(() => { })
 
     audioRef.current = audio
 
@@ -67,17 +76,21 @@ export default function LovePage() {
       window.removeEventListener("touchstart", unmute)
       audio.pause()
     }
-  }, [])
+  }, [isValidId])
 
   // Drama text animation
   useEffect(() => {
+    if (!isValidId) return
+
     const timer = setInterval(() => {
       setMsgIndex((i) => (i + 1) % messages.length)
     }, 3000)
     return () => clearInterval(timer)
-  }, [])
+  }, [isValidId, messages.length])
 
   const respond = async (action) => {
+    if (!isValidId) return
+
     await fetch("/api/respond", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -96,13 +109,14 @@ export default function LovePage() {
     }
   }
 
+  if (!isValidId) return null
+
   return (
     <div
-      className={`${
-        dark
-          ? "bg-black text-white"
-          : "bg-gradient-to-br from-pink-200 to-red-300"
-      } min-h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden`}
+      className={`${dark
+        ? "bg-black text-white"
+        : "bg-gradient-to-br from-pink-200 to-red-300"
+        } min-h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden`}
     >
       <FloatingHearts />
 

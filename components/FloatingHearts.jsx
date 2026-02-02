@@ -4,24 +4,30 @@ import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 
 export default function FloatingHearts() {
-  const [mounted, setMounted] = useState(false)
-  const [width, setWidth] = useState(0)
+  const [particles, setParticles] = useState([])
 
   useEffect(() => {
-    setMounted(true)
-    setWidth(window.innerWidth)
+    const w = window.innerWidth
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setParticles(
+      [...Array(12)].map(() => ({
+        x: Math.random() * w,
+        duration: 10 + Math.random() * 5,
+        delay: Math.random() * 4
+      }))
+    )
   }, [])
 
-  if (!mounted || !width) return null
+  if (particles.length === 0) return null
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(12)].map((_, i) => (
+      {particles.map((p, i) => (
         <motion.div
           key={i}
           initial={{
             y: "100%",
-            x: Math.random() * width,
+            x: p.x,
             opacity: 0
           }}
           animate={{
@@ -29,9 +35,9 @@ export default function FloatingHearts() {
             opacity: [0, 1, 1, 0]
           }}
           transition={{
-            duration: 10 + Math.random() * 5,
+            duration: p.duration,
             repeat: Infinity,
-            delay: Math.random() * 4
+            delay: p.delay
           }}
           className="absolute text-pink-400 text-3xl"
         >
